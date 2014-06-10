@@ -39,6 +39,6 @@ class LoopFactory
      */
     public function createAlertFastLoop(LoopInterface $reactor)
     {
-        return new Alertable\FastLoop($reactor);
+        return new Alertable\SimpleLoop($reactor);
     }
 }
