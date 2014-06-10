@@ -164,6 +164,7 @@ class Loop implements LoopInterface
     public function cancelTimer(TimerInterface $timer)
     {
         $id = $this->timers->offsetGet($timer);
+        $this->timers->offsetUnset($timer);
         $this->reactor->cancel($id);
     }
 
