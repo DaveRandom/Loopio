@@ -1,0 +1,16 @@
+{
+    "name": "daverandom/alert-react-bridge",
+    "description": "Provides interoperability for components using the React and Alert event loops",
+    "minimum-stability": "dev",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Wright",
+            "email": "github@daverandom.com"
+        }
+    ],
+    "require": {
+        "react/react": "0.4.x-dev",
+        "rdlowrey/alert": "v0.8.0"
+    }
+}
