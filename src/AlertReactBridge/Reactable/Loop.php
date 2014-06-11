@@ -92,8 +92,10 @@ class Loop implements LoopInterface
     {
         $id = (int) $stream;
 
-        $this->reactor->cancel($this->readWatcherIDs[$id]);
-        unset($this->readWatcherIDs[$id]);
+        if (isset($this->readWatcherIDs[$id])) {
+            $this->reactor->cancel($this->readWatcherIDs[$id]);
+            unset($this->readWatcherIDs[$id]);
+        }
     }
 
     /**
@@ -105,8 +107,10 @@ class Loop implements LoopInterface
     {
         $id = (int) $stream;
 
-        $this->reactor->cancel($this->writeWatcherIDs[$id]);
-        unset($this->writeWatcherIDs[$id]);
+        if (isset($this->writeWatcherIDs[$id])) {
+            $this->reactor->cancel($this->writeWatcherIDs[$id]);
+            unset($this->writeWatcherIDs[$id]);
+        }
     }
 
     /**
