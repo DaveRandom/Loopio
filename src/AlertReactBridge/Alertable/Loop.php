@@ -26,14 +26,14 @@ abstract class Loop implements Reactor
      *
      * @var array
      */
-    protected $watchers = [];
+    private $watchers = [];
 
     /**
      * Counter for watcher IDs
      *
      * @var int
      */
-    private $watcherID = 0;
+    private $watcherId = 0;
 
     /**
      * Constructor
@@ -53,10 +53,10 @@ abstract class Loop implements Reactor
     private function generateWatcherID()
     {
         do {
-            $result = $this->watcherID++;
+            $result = $this->watcherId++;
 
-            if ($this->watcherID > PHP_INT_MAX) {
-                $this->watcherID = 0;
+            if ($this->watcherId > PHP_INT_MAX) {
+                $this->watcherId = 0;
             }
         } while (isset($this->watchers[$result]));
 
@@ -70,7 +70,7 @@ abstract class Loop implements Reactor
      * @param mixed $data
      * @return int
      */
-    protected function registerWatcher($type, $data = null)
+    protected function registerWatcher($type, $data)
     {
         $id = $this->generateWatcherID();
         $this->watchers[$id] = [$type, $data];
@@ -79,11 +79,21 @@ abstract class Loop implements Reactor
     }
 
     /**
+     * Deregister a watcher by ID
+     *
+     * @param $watcherId
+     */
+    protected function deregisterWatcher($watcherId)
+    {
+        unset($this->watchers[$watcherId]);
+    }
+
+    /**
      * Start the event reactor and assume program flow control
      *
      * @param callable $onStart Optional callback to invoke immediately upon reactor start
      */
-    public function run(callable $onStart = NULL)
+    public function run(callable $onStart = null)
     {
         if ($onStart) {
             $this->reactor->nextTick($onStart);
@@ -106,5 +116,31 @@ abstract class Loop implements Reactor
     public function stop()
     {
         $this->reactor->stop();
+    }
+
+    /**
+     * Cancel an existing timer/stream watcher
+     *
+     * @param int $watcherId
+     */
+    public function cancel($watcherId)
+    {
+        list($type, $data) = $this->watchers[$watcherId];
+
+        switch ($type) {
+            case Loop::WATCHER_TYPE_READ:
+                $this->reactor->removeReadStream($data);
+                break;
+
+            case Loop::WATCHER_TYPE_WRITE:
+                $this->reactor->removeWriteStream($data);
+                break;
+
+            case Loop::WATCHER_TYPE_TIMER:
+                $this->reactor->cancelTimer($data);
+                break;
+        }
+
+        unset($this->watchers[$watcherId]);
     }
 }

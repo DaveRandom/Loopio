@@ -15,15 +15,15 @@ class SimpleLoop extends Loop
      */
     public function immediately(callable $callback)
     {
-        $id = 0;
+        $watcherId = null;
 
-        $timer = $this->reactor->addTimer(0, function() use(&$id, $callback) {
-            unset($this->watchers[$id]);
+        $timer = $this->reactor->addTimer(0, function() use(&$watcherId, $callback) {
+            $this->deregisterWatcher($watcherId);
             return call_user_func($callback);
         });
-        $id = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
-        return $id;
+        return $watcherId;
     }
 
     /**
@@ -37,15 +37,15 @@ class SimpleLoop extends Loop
      */
     public function once(callable $callback, $delay)
     {
-        $id = 0;
+        $watcherId = null;
 
-        $timer = $this->reactor->addTimer($delay / 1000, function() use(&$id, $callback) {
-            unset($this->watchers[$id]);
+        $timer = $this->reactor->addTimer($delay / 1000, function() use(&$watcherId, $callback) {
+            $this->deregisterWatcher($watcherId);
             return call_user_func($callback);
         });
-        $id = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
-        return $id;
+        return $watcherId;
     }
 
     /**
@@ -59,15 +59,15 @@ class SimpleLoop extends Loop
      */
     public function repeat(callable $callback, $interval)
     {
-        $id = 0;
+        $watcherId = null;
 
-        $timer = $this->reactor->addPeriodicTimer($interval / 1000, function() use(&$id, $callback) {
-            unset($this->watchers[$id]);
+        $timer = $this->reactor->addPeriodicTimer($interval / 1000, function() use(&$watcherId, $callback) {
+            $this->deregisterWatcher($watcherId);
             return call_user_func($callback);
         });
-        $id = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
-        return $id;
+        return $watcherId;
     }
 
     /**
@@ -82,7 +82,7 @@ class SimpleLoop extends Loop
     {
         $now = time();
         $executeAt = @strtotime($timeString);
-        $id = 0;
+        $watcherId = null;
 
         if ($executeAt === false || $executeAt <= $now) {
             throw new \InvalidArgumentException(
@@ -90,13 +90,13 @@ class SimpleLoop extends Loop
             );
         }
 
-        $timer = $this->reactor->addTimer($executeAt - $now, function() use(&$id, $callback) {
-            unset($this->watchers[$id]);
+        $timer = $this->reactor->addTimer($executeAt - $now, function() use(&$watcherId, $callback) {
+            $this->deregisterWatcher($watcherId);
             return call_user_func($callback);
         });
-        $id = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
-        return $id;
+        return $watcherId;
     }
 
     /**
@@ -135,32 +135,6 @@ class SimpleLoop extends Loop
 
         $this->reactor->addWriteStream($stream, $callback);
         return $this->registerWatcher(self::WATCHER_TYPE_WRITE, $stream);
-    }
-
-    /**
-     * Cancel an existing timer/stream watcher
-     *
-     * @param int $watcherId
-     */
-    public function cancel($watcherId)
-    {
-        list($type, $data) = $this->watchers[$watcherId];
-
-        switch ($type) {
-            case self::WATCHER_TYPE_READ:
-                $this->reactor->removeReadStream($data);
-                break;
-
-            case self::WATCHER_TYPE_WRITE:
-                $this->reactor->removeWriteStream($data);
-                break;
-
-            case self::WATCHER_TYPE_TIMER:
-                $this->reactor->cancelTimer($data);
-                break;
-        }
-
-        unset($this->watchers[$watcherId]);
     }
 
     /**
