@@ -23,7 +23,12 @@ class FullyCompatibleLoop extends Loop
 
         $timer = $this->reactor->addTimer(0, function() use(&$watcherId, $callback) {
             $this->deregisterWatcher($watcherId);
-            return !isset($this->disabledWatchers[$watcherId]) ? call_user_func($callback) : null;
+
+            if (isset($this->disabledWatchers[$watcherId])) {
+                return null;
+            }
+
+            return call_user_func($callback, $watcherId, $this);
         });
         $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
@@ -45,7 +50,12 @@ class FullyCompatibleLoop extends Loop
 
         $timer = $this->reactor->addTimer($delay / 1000, function() use(&$watcherId, $callback) {
             $this->deregisterWatcher($watcherId);
-            return !isset($this->disabledWatchers[$watcherId]) ? call_user_func($callback) : null;
+
+            if (isset($this->disabledWatchers[$watcherId])) {
+                return null;
+            }
+
+            return call_user_func($callback, $watcherId, $this);
         });
         $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
@@ -67,7 +77,12 @@ class FullyCompatibleLoop extends Loop
 
         $timer = $this->reactor->addPeriodicTimer($interval / 1000, function() use(&$watcherId, $callback) {
             $this->deregisterWatcher($watcherId);
-            return !isset($this->disabledWatchers[$watcherId]) ? call_user_func($callback) : null;
+
+            if (isset($this->disabledWatchers[$watcherId])) {
+                return null;
+            }
+
+            return call_user_func($callback, $watcherId, $this);
         });
         $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
@@ -86,7 +101,6 @@ class FullyCompatibleLoop extends Loop
     {
         $now = time();
         $executeAt = @strtotime($timeString);
-        $watcherId = null;
 
         if ($executeAt === false || $executeAt <= $now) {
             throw new \InvalidArgumentException(
@@ -94,13 +108,7 @@ class FullyCompatibleLoop extends Loop
             );
         }
 
-        $timer = $this->reactor->addTimer($executeAt - $now, function() use(&$watcherId, $callback) {
-            $this->deregisterWatcher($watcherId);
-            return !isset($this->disabledWatchers[$watcherId]) ? call_user_func($callback) : null;
-        });
-        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
-
-        return $watcherId;
+        return $this->once($callback, ($executeAt - $now) * 1000);
     }
 
     /**
@@ -115,8 +123,12 @@ class FullyCompatibleLoop extends Loop
     {
         $watcherId = null;
 
-        $this->reactor->addReadStream($stream, function() use(&$watcherId, $callback) {
-            return !isset($this->disabledWatchers[$watcherId]) ? call_user_func($callback) : null;
+        $this->reactor->addReadStream($stream, function() use($callback, &$watcherId, $stream) {
+            if (isset($this->disabledWatchers[$watcherId])) {
+                return null;
+            }
+
+            return call_user_func($callback, $watcherId, $stream, $this);
         });
         $watcherId = $this->registerWatcher(self::WATCHER_TYPE_READ, $stream);
 
@@ -139,8 +151,12 @@ class FullyCompatibleLoop extends Loop
     {
         $watcherId = null;
 
-        $this->reactor->addWriteStream($stream, function() use(&$watcherId, $callback) {
-            return !isset($this->disabledWatchers[$watcherId]) ? call_user_func($callback) : null;
+        $this->reactor->addWriteStream($stream, function() use($callback, &$watcherId, $stream) {
+            if (isset($this->disabledWatchers[$watcherId])) {
+                return null;
+            }
+
+            return call_user_func($callback, $watcherId, $stream, $this);
         });
         $watcherId = $this->registerWatcher(self::WATCHER_TYPE_WRITE, $stream);
 
