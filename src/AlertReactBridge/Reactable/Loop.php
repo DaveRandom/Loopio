@@ -65,7 +65,9 @@ class Loop implements LoopInterface
      */
     public function addReadStream($stream, callable $listener)
     {
-        $this->readWatcherIDs[(int) $stream] = $this->reactor->onReadable($stream, $listener);
+        $this->readWatcherIDs[(int) $stream] = $this->reactor->onReadable($stream, function() use($listener, $stream) {
+            return call_user_func($listener, $stream, $this);
+        });
     }
 
     /**
@@ -76,7 +78,9 @@ class Loop implements LoopInterface
      */
     public function addWriteStream($stream, callable $listener)
     {
-        $this->writeWatcherIDs[(int) $stream] = $this->reactor->onWritable($stream, $listener);
+        $this->writeWatcherIDs[(int) $stream] = $this->reactor->onWritable($stream, function() use($listener, $stream) {
+            return call_user_func($listener, $stream, $this);
+        });
     }
 
     /**
@@ -129,8 +133,12 @@ class Loop implements LoopInterface
      */
     public function addTimer($interval, callable $callback)
     {
-        $id = $this->reactor->repeat($callback, $interval);
-        $timer = $this->timerFactory->create($this, $interval, $callback, false);
+        $timer = null;
+
+        $id = $this->reactor->once($callback, $interval * 1000);
+        $timer = $this->timerFactory->create($this, $interval, function() use(&$timer, $callback) {
+            call_user_func($callback, $timer);
+        }, false);
         $this->timers->offsetSet($timer, $id);
 
         return $timer;
@@ -149,8 +157,12 @@ class Loop implements LoopInterface
      */
     public function addPeriodicTimer($interval, callable $callback)
     {
-        $id = $this->reactor->repeat($callback, $interval);
-        $timer = $this->timerFactory->create($this, $interval, $callback, true);
+        $timer = null;
+
+        $id = $this->reactor->repeat($callback, $interval * 1000);
+        $timer = $this->timerFactory->create($this, $interval, function() use(&$timer, $callback) {
+            call_user_func($callback, $timer);
+        }, true);
         $this->timers->offsetSet($timer, $id);
 
         return $timer;
