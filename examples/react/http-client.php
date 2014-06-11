@@ -2,7 +2,7 @@
 
 // http client making a request to github api
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 $reactor = (new Alert\ReactorFactory)->select();
 $loop = (new AlertReactBridge\LoopFactory)->createReactCompatibleLoop($reactor);

@@ -139,10 +139,12 @@ class Loop implements LoopInterface
     {
         $timer = null;
 
-        $id = $this->reactor->once($callback, $interval * 1000);
-        $timer = $this->timerFactory->create($this, $interval, function() use(&$timer, $callback) {
-            call_user_func($callback, $timer);
-        }, false);
+        $wrappedCallback = function() use($callback, &$timer) {
+            return call_user_func($callback, $timer);
+        };
+
+        $id = $this->reactor->once($wrappedCallback, $interval * 1000);
+        $timer = $this->timerFactory->create($this, $interval, $wrappedCallback, false);
         $this->timers->offsetSet($timer, $id);
 
         return $timer;
@@ -163,10 +165,12 @@ class Loop implements LoopInterface
     {
         $timer = null;
 
-        $id = $this->reactor->repeat($callback, $interval * 1000);
-        $timer = $this->timerFactory->create($this, $interval, function() use(&$timer, $callback) {
-            call_user_func($callback, $timer);
-        }, true);
+        $wrappedCallback = function() use($callback, &$timer) {
+            return call_user_func($callback, $timer);
+        };
+
+        $id = $this->reactor->repeat($wrappedCallback, $interval * 1000);
+        $timer = $this->timerFactory->create($this, $interval, $wrappedCallback, true);
         $this->timers->offsetSet($timer, $id);
 
         return $timer;
@@ -179,9 +183,11 @@ class Loop implements LoopInterface
      */
     public function cancelTimer(TimerInterface $timer)
     {
-        $id = $this->timers->offsetGet($timer);
-        $this->timers->offsetUnset($timer);
-        $this->reactor->cancel($id);
+        if ($this->timers->offsetExists($timer)) {
+            $id = $this->timers->offsetGet($timer);
+            $this->timers->offsetUnset($timer);
+            $this->reactor->cancel($id);
+        }
     }
 
     /**
@@ -193,7 +199,7 @@ class Loop implements LoopInterface
      */
     public function isTimerActive(TimerInterface $timer)
     {
-        return $timer->isActive();
+        return $this->timers->offsetExists($timer);
     }
 
     /**
@@ -206,7 +212,9 @@ class Loop implements LoopInterface
      */
     public function nextTick(callable $listener)
     {
-        $this->reactor->immediately($listener);
+        $this->reactor->immediately(function() use($listener) {
+            call_user_func($listener, $this);
+        });
     }
 
     /**
@@ -218,7 +226,7 @@ class Loop implements LoopInterface
      */
     public function futureTick(callable $listener)
     {
-        $this->reactor->immediately($listener);
+        $this->nextTick($listener);
     }
 
     /**
