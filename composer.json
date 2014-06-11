@@ -10,7 +10,13 @@
         }
     ],
     "require": {
+        "php": ">=5.4.0",
         "react/react": "0.4.x-dev",
         "rdlowrey/alert": "v0.8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AlertReactBridge\\": "src"
+        }
     }
 }
