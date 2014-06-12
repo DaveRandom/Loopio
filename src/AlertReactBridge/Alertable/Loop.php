@@ -121,20 +121,22 @@ class Loop implements Reactor
      */
     public function cancel($watcherId)
     {
-        list($type, $data) = $this->watchers[$watcherId];
+        if (isset($this->watchers[$watcherId])) {
+            list($type, $data) = $this->watchers[$watcherId];
 
-        switch ($type) {
-            case Loop::WATCHER_TYPE_READ:
-                $this->reactor->removeReadStream($data);
-                break;
+            switch ($type) {
+                case self::WATCHER_TYPE_READ:
+                    $this->reactor->removeReadStream($data);
+                    break;
 
-            case Loop::WATCHER_TYPE_WRITE:
-                $this->reactor->removeWriteStream($data);
-                break;
+                case self::WATCHER_TYPE_WRITE:
+                    $this->reactor->removeWriteStream($data);
+                    break;
 
-            case Loop::WATCHER_TYPE_TIMER:
-                $this->reactor->cancelTimer($data);
-                break;
+                case self::WATCHER_TYPE_TIMER:
+                    $this->reactor->cancelTimer($data);
+                    break;
+            }
         }
 
         unset($this->watchers[$watcherId], $this->disabledWatchers[$watcherId]);
@@ -159,7 +161,7 @@ class Loop implements Reactor
 
             return call_user_func($callback, $watcherId, $this);
         });
-        $watcherId = $this->registerWatcher(Loop::WATCHER_TYPE_TIMER, $timer);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
         return $watcherId;
     }
@@ -186,7 +188,7 @@ class Loop implements Reactor
 
             return call_user_func($callback, $watcherId, $this);
         });
-        $watcherId = $this->registerWatcher(Loop::WATCHER_TYPE_TIMER, $timer);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
         return $watcherId;
     }
@@ -213,7 +215,7 @@ class Loop implements Reactor
 
             return call_user_func($callback, $watcherId, $this);
         });
-        $watcherId = $this->registerWatcher(Loop::WATCHER_TYPE_TIMER, $timer);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_TIMER, $timer);
 
         return $watcherId;
     }
@@ -259,7 +261,7 @@ class Loop implements Reactor
 
             return call_user_func($callback, $watcherId, $stream, $this);
         });
-        $watcherId = $this->registerWatcher(Loop::WATCHER_TYPE_READ, $stream);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_READ, $stream);
 
         if (!$enableNow) {
             $this->disable($watcherId);
@@ -287,7 +289,7 @@ class Loop implements Reactor
 
             return call_user_func($callback, $watcherId, $stream, $this);
         });
-        $watcherId = $this->registerWatcher(Loop::WATCHER_TYPE_WRITE, $stream);
+        $watcherId = $this->registerWatcher(self::WATCHER_TYPE_WRITE, $stream);
 
         if (!$enableNow) {
             $this->disable($watcherId);
