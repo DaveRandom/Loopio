@@ -5,7 +5,7 @@
 require __DIR__ . '/../../vendor/autoload.php';
 
 $reactor = (new Alert\ReactorFactory)->select();
-$loop = (new AlertReactBridge\LoopFactory)->createReactCompatibleLoop($reactor);
+$loop = (new AlertReactBridge\LoopFactory)->createReactLoop($reactor);
 
 $files = array(
     'node-v0.6.18.tar.gz' => 'http://nodejs.org/dist/v0.6.18/node-v0.6.18.tar.gz',

@@ -5,7 +5,7 @@
 require __DIR__ . '/../../vendor/autoload.php';
 
 $reactor = (new Alert\ReactorFactory)->select();
-$loop = (new AlertReactBridge\LoopFactory)->createReactCompatibleLoop($reactor);
+$loop = (new AlertReactBridge\LoopFactory)->createReactLoop($reactor);
 
 for ($i=0;$i<10;++$i) {
     $s=stream_socket_server('tcp://127.0.0.1:'.(8000+$i));

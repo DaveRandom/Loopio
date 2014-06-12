@@ -5,7 +5,7 @@
 require __DIR__ . '/../../vendor/autoload.php';
 
 $reactor = (new Alert\ReactorFactory)->select();
-$loop = (new AlertReactBridge\LoopFactory)->createReactCompatibleLoop($reactor);
+$loop = (new AlertReactBridge\LoopFactory)->createReactLoop($reactor);
 
 $factory = new React\Dns\Resolver\Factory();
 $dns = $factory->create('8.8.8.8', $loop);

@@ -8,7 +8,7 @@
 require __DIR__ . '/../../vendor/autoload.php';
 
 $reactor = (new Alert\ReactorFactory)->select();
-$loop = (new AlertReactBridge\LoopFactory)->createReactCompatibleLoop($reactor);
+$loop = (new AlertReactBridge\LoopFactory)->createReactLoop($reactor);
 
 $socket = new React\Socket\Server($loop);
 

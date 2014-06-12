@@ -15,7 +15,7 @@ class LoopFactory
      * @param Reactor $reactor
      * @return LoopInterface
      */
-    public function createReactCompatibleLoop(Reactor $reactor)
+    public function createReactLoop(Reactor $reactor)
     {
         return new Reactable\Loop($reactor, new Reactable\TimerFactory);
     }
@@ -26,19 +26,8 @@ class LoopFactory
      * @param LoopInterface $reactor
      * @return Reactor
      */
-    public function createAlertCompatibleLoop(LoopInterface $reactor)
+    public function createAlertLoop(LoopInterface $reactor)
     {
-        return new Alertable\FullyCompatibleLoop($reactor);
-    }
-
-    /**
-     * Create a maximum performance loop which is partially compatible with Alert
-     *
-     * @param LoopInterface $reactor
-     * @return Reactor
-     */
-    public function createAlertFastLoop(LoopInterface $reactor)
-    {
-        return new Alertable\SimpleLoop($reactor);
+        return new Alertable\Loop($reactor);
     }
 }
