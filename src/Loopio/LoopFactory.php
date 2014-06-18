@@ -1,9 +1,9 @@
 <?php
 
-namespace AlertReactBridge;
+namespace Loopio;
 
-use AlertReactBridge\Alertable,
-    AlertReactBridge\Reactable,
+use Loopio\Alertable,
+    Loopio\Reactable,
     Alert\Reactor,
     React\EventLoop\LoopInterface;
 

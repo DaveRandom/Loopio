@@ -7,7 +7,7 @@
 require __DIR__ . '/../../vendor/autoload.php';
 
 $loop = React\EventLoop\Factory::create();
-$reactor = (new AlertReactBridge\LoopFactory)->createAlertLoop($loop);
+$reactor = (new Loopio\LoopFactory)->createAlertLoop($loop);
 
 $ticker = function() { echo "tick ", time(), PHP_EOL; };
 

@@ -1,7 +1,6 @@
 {
-    "name": "daverandom/alert-react-bridge",
+    "name": "daverandom/loopio",
     "description": "Provides interoperability for components using the React and Alert event loops",
-    "minimum-stability": "stable",
     "license": "MIT",
     "authors": [
         {
@@ -11,12 +10,12 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "react/react": "0.4.x-dev",
-        "rdlowrey/alert": ">=0.6.0"
+        "react/react": "~0.1",
+        "rdlowrey/alert": "~0.1"
     },
     "autoload": {
         "psr-4": {
-            "AlertReactBridge\\": "src/AlertReactBridge/"
+            "Loopio\\": "src/Loopio/"
         }
     }
 }

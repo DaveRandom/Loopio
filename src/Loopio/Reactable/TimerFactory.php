@@ -1,6 +1,6 @@
 <?php
 
-namespace AlertReactBridge\Reactable;
+namespace Loopio\Reactable;
 
 use React\EventLoop\LoopInterface,
     React\EventLoop\Timer\Timer;

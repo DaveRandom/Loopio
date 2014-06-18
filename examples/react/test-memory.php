@@ -3,7 +3,7 @@
 require __DIR__ . '/../../vendor/autoload.php';
 
 $reactor = (new Alert\ReactorFactory)->select();
-$loop = (new AlertReactBridge\LoopFactory)->createReactLoop($reactor);
+$loop = (new Loopio\LoopFactory)->createReactLoop($reactor);
 
 $i = 0;
 

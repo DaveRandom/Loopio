@@ -1,6 +1,6 @@
 <?php
 
-namespace AlertReactBridge\Alertable;
+namespace Loopio\Alertable;
 
 use Alert\Reactor,
     React\EventLoop\LoopInterface;

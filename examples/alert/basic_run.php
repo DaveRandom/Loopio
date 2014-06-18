@@ -7,7 +7,7 @@
 require __DIR__ . '/../../vendor/autoload.php';
 
 $loop = React\EventLoop\Factory::create();
-$reactor = (new AlertReactBridge\LoopFactory)->createAlertLoop($loop);
+$reactor = (new Loopio\LoopFactory)->createAlertLoop($loop);
 
 stream_set_blocking(STDIN, FALSE);
 

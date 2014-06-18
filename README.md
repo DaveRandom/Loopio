@@ -1,5 +1,5 @@
-Alert-React Bridge
-==================
+Loopio
+======
 
 Provides interoperability between [Alert](https://github.com/rdlowrey/Alert) and [React](https://github.com/reactphp/react).
 
