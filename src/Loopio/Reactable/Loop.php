@@ -6,7 +6,7 @@ use React\EventLoop\LoopInterface,
     React\EventLoop\Timer\TimerInterface,
     Alert\Reactor;
 
-class Loop implements LoopInterface
+abstract class Loop implements LoopInterface
 {
     /**
      * Underlying reactor implementation
@@ -14,13 +14,6 @@ class Loop implements LoopInterface
      * @var Reactor
      */
     private $reactor;
-
-    /**
-     * Factory which makes Timer instances
-     *
-     * @var TimerFactory
-     */
-    private $timerFactory;
 
     /**
      * Map of stream IDs to Alert read watcher IDs
@@ -39,23 +32,36 @@ class Loop implements LoopInterface
     /**
      * Map of timers to Alert timer watcher IDs
      *
-     * @var \SplObjectStorage
+     * @var \ArrayAccess
      */
-    private $timers;
+    protected $timers;
+
+    /**
+     * Scale factor by which times are adjusted
+     *
+     * @var int
+     */
+    protected $timeScaleFactor = 1;
 
     /**
      * Constructor
      *
      * @param Reactor $reactor
-     * @param TimerFactory $timerFactory
      */
-    public function __construct(Reactor $reactor, TimerFactory $timerFactory)
+    public function __construct(Reactor $reactor)
     {
         $this->reactor = $reactor;
-        $this->timerFactory = $timerFactory;
-
-        $this->timers = new \SplObjectStorage();
     }
+
+    /**
+     * Create a timer entity to return to the user
+     *
+     * @param int|float $interval The number of seconds to wait before execution.
+     * @param callable $callback The callback to invoke.
+     * @param bool $repeating Whether the time is repeating
+     * @return mixed
+     */
+    abstract protected function createTimer($interval, $callback, $repeating);
 
     /**
      * Register a listener to be notified when a stream is ready to read.
@@ -143,8 +149,8 @@ class Loop implements LoopInterface
             return call_user_func($callback, $timer);
         };
 
-        $id = $this->reactor->once($wrappedCallback, $interval * 1000);
-        $timer = $this->timerFactory->create($this, $interval, $wrappedCallback, false);
+        $id = $this->reactor->once($wrappedCallback, $interval * $this->timeScaleFactor);
+        $timer = $this->createTimer($interval, $wrappedCallback, false);
         $this->timers->offsetSet($timer, $id);
 
         return $timer;
@@ -169,8 +175,8 @@ class Loop implements LoopInterface
             return call_user_func($callback, $timer);
         };
 
-        $id = $this->reactor->repeat($wrappedCallback, $interval * 1000);
-        $timer = $this->timerFactory->create($this, $interval, $wrappedCallback, true);
+        $id = $this->reactor->repeat($wrappedCallback, $interval * $this->timeScaleFactor);
+        $timer = $this->createTimer($interval, $wrappedCallback, true);
         $this->timers->offsetSet($timer, $id);
 
         return $timer;

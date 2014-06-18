@@ -16,6 +16,9 @@
     "autoload": {
         "psr-4": {
             "Loopio\\": "src/Loopio/"
-        }
+        },
+        "files": [
+            "src/Loopio/version.php"
+        ]
     }
 }

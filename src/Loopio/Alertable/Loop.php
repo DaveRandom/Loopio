@@ -5,7 +5,7 @@ namespace Loopio\Alertable;
 use Alert\Reactor,
     React\EventLoop\LoopInterface;
 
-class Loop implements Reactor
+abstract class Loop implements Reactor
 {
     /**
      * Watcher type constants
@@ -41,6 +41,13 @@ class Loop implements Reactor
      * @var int
      */
     private $watcherId = 0;
+
+    /**
+     * Scale factor by which times are adjusted
+     *
+     * @var int
+     */
+    protected $timeScaleFactor = 1;
 
     /**
      * Constructor
@@ -152,7 +159,7 @@ class Loop implements Reactor
     {
         $watcherId = null;
 
-        $timer = $this->reactor->addTimer(0, function () use (&$watcherId, $callback) {
+        $timer = $this->reactor->addTimer(0, function() use(&$watcherId, $callback) {
             $this->deregisterWatcher($watcherId);
 
             if (isset($this->disabledWatchers[$watcherId])) {
@@ -179,7 +186,7 @@ class Loop implements Reactor
     {
         $watcherId = null;
 
-        $timer = $this->reactor->addTimer($delay / 1000, function () use (&$watcherId, $callback) {
+        $timer = $this->reactor->addTimer($delay / $this->timeScaleFactor, function() use(&$watcherId, $callback) {
             $this->deregisterWatcher($watcherId);
 
             if (isset($this->disabledWatchers[$watcherId])) {
@@ -206,7 +213,7 @@ class Loop implements Reactor
     {
         $watcherId = null;
 
-        $timer = $this->reactor->addPeriodicTimer($interval / 1000, function () use (&$watcherId, $callback) {
+        $timer = $this->reactor->addPeriodicTimer($interval / $this->timeScaleFactor, function() use(&$watcherId, $callback) {
             $this->deregisterWatcher($watcherId);
 
             if (isset($this->disabledWatchers[$watcherId])) {
@@ -254,7 +261,7 @@ class Loop implements Reactor
     {
         $watcherId = null;
 
-        $this->reactor->addReadStream($stream, function () use ($callback, &$watcherId, $stream) {
+        $this->reactor->addReadStream($stream, function() use($callback, &$watcherId, $stream) {
             if (isset($this->disabledWatchers[$watcherId])) {
                 return null;
             }
@@ -282,7 +289,7 @@ class Loop implements Reactor
     {
         $watcherId = null;
 
-        $this->reactor->addWriteStream($stream, function () use ($callback, &$watcherId, $stream) {
+        $this->reactor->addWriteStream($stream, function() use($callback, &$watcherId, $stream) {
             if (isset($this->disabledWatchers[$watcherId])) {
                 return null;
             }
