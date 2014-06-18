@@ -10,8 +10,8 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "react/react": "~0.1",
-        "rdlowrey/alert": "~0.1"
+        "react/react": "<0.5",
+        "rdlowrey/alert": ">=0.1.1,<0.9"
     },
     "autoload": {
         "psr-4": {
