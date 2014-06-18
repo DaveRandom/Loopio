@@ -2,5 +2,5 @@
 
 namespace Loopio;
 
-const VERSION = 0;
-const VERSION_NAME = '0.0.0';
+const VERSION = 100;
+const VERSION_NAME = '0.1.0';
